@@ -9,7 +9,7 @@
 
 How to install
 ----------------------------
-Copy to files to your server except database_schema.sql
+Copy all files to your server, except database_schema.sql
 
 Set permissions 777 to cache folder
 ```bash
