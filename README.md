@@ -2,7 +2,7 @@
 ==================================================
 
 * Doodstrap was made to bootstrap my projects, it is for my personal use.
-* This simple framework provides database, template, language and account management API.
+* This simple framework provides database, cache, template, language and account management API.
 * You can build your sites on this framework, for free.
 * Yes, it is very simple.
 
@@ -28,4 +28,4 @@ Run it
 
 License
 ----------------------------
-Doodstrap is licensed under  [GPL v3 ] license, included in package.
+Doodstrap is licensed under GPLv3 license, included in package.
