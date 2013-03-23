@@ -559,7 +559,7 @@ class API {
  * @param string $email
  * @param string $password plaintext password
  * @param boolean $nosession Do not start new session
- * @return boolean true on success, false on failure
+ * @return boolean|int account id on success, false on failure
  */
     function login_account($email, $password, $nosession = false) {
         $account = $this->DB->query_row("SELECT * FROM accounts WHERE email=" . $this->DB->sqlesc($email));
@@ -574,7 +574,7 @@ class API {
             $this->account = $account;
             if (!$nosession)
                 $this->session();
-            return true;
+            return $this->account['id'];
         }
         else
             return false;
