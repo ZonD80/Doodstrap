@@ -529,21 +529,22 @@ class API {
             fwrite($handle, time() . " " . $this->getip() . " $string\n");
         }
     }
-/**
- * Creates account
- * @param string $email Email used to login
- * @param string $password Password
- * @param string $name Optional, account name
- * @param array $data associative array of additional accounts table columns values
- * @return boolean|int False or new account ID
- */
-    function create_account($email, $password, $name = '',$data=null) {
+
+    /**
+     * Creates account
+     * @param string $email Email used to login
+     * @param string $password Password
+     * @param string $name Optional, account name
+     * @param array $data associative array of additional accounts table columns values
+     * @return boolean|int False or new account ID
+     */
+    function create_account($email, $password, $name = '', $data = null) {
         $to_db['name'] = $name;
         $to_db['pass_salt'] = $this->mksecret();
         $to_db['pass_hash'] = $this->mkpasshash($password, $to_db['pass_salt']);
         $to_db['email'] = $email;
         if ($data) {
-            foreach ($data as $k=>$d) {
+            foreach ($data as $k => $d) {
                 $to_db[$k] = $d;
             }
         }
@@ -553,8 +554,14 @@ class API {
         else
             return $this->DB->mysql_insert_id();
     }
-
-    function login_account($email, $password) {
+/**
+ * Logins account
+ * @param string $email
+ * @param string $password plaintext password
+ * @param boolean $nosession Do not start new session
+ * @return boolean true on success, false on failure
+ */
+    function login_account($email, $password, $nosession = false) {
         $account = $this->DB->query_row("SELECT * FROM accounts WHERE email=" . $this->DB->sqlesc($email));
 
         $pass_hash = $this->mkpasshash($password, $account['pass_salt']);
@@ -565,7 +572,8 @@ class API {
                     $account[$c['name']] = $c['value'];
                 }
             $this->account = $account;
-            $this->session();
+            if (!$nosession)
+                $this->session();
             return true;
         }
         else
