@@ -251,7 +251,7 @@ class LANG extends API {
                 die("ERROR: No lang to export ($lang)");
         }
         foreach ($this->lang[$lang] as $key => $value) {
-            print "$key=$value\n";
+            print "$key=".str_replace(array("\n","\r","\r\n"),'',$value)."\n";
         }
         die("// langfile ($lang) from " . $this->API->CONFIG['defaultbaseurl'] . " created at " . date('d/m/Y H:i:s'));
     }

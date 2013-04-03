@@ -543,6 +543,7 @@ class API {
         $to_db['pass_salt'] = $this->mksecret();
         $to_db['pass_hash'] = $this->mkpasshash($password, $to_db['pass_salt']);
         $to_db['email'] = $email;
+        $to_db['added'] = $this->CONFIG['TIME'];
         if ($data) {
             foreach ($data as $k => $d) {
                 $to_db[$k] = $d;
