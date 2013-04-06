@@ -284,7 +284,7 @@ class API {
     }
 
     /**
-     * HTTP auth in admincp, modtask, etc
+     * HTTP auth in admincp, etc
      * @return void
      */
     function httpauth() {
@@ -295,8 +295,8 @@ class API {
             $_SERVER['PHP_AUTH_PW'] = implode('', $auth_params);
         }
 
-        if ($_SERVER['PHP_AUTH_USER'] <> 'root' && $_SERVER['PHP_AUTH_PW'] <> 'root') {
-            header("WWW-Authenticate: Basic realm=\"VVEDITE VASH LOGIN I PAROL\"");
+        if (!$this->login_account($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'], true)) {
+            header("WWW-Authenticate: Basic realm=\"Enter your email and password. Case sensitive.\"");
             header("HTTP/1.0 401 Unauthorized");
             $this->error('not authorized');
         }
@@ -555,13 +555,14 @@ class API {
         else
             return $this->DB->mysql_insert_id();
     }
-/**
- * Logins account
- * @param string $email
- * @param string $password plaintext password
- * @param boolean $nosession Do not start new session
- * @return boolean|int account id on success, false on failure
- */
+
+    /**
+     * Logins account
+     * @param string $email
+     * @param string $password plaintext password
+     * @param boolean $nosession Do not start new session
+     * @return boolean|int account id on success, false on failure
+     */
     function login_account($email, $password, $nosession = false) {
         $account = $this->DB->query_row("SELECT * FROM accounts WHERE email=" . $this->DB->sqlesc($email));
 
