@@ -467,7 +467,7 @@ class API {
             $this->CACHE->addDriver(NULL, new FileCacheDriver($this->CONFIG['cache_dir']));
         } elseif ($this->CONFIG['CACHEDRIVER'] == 'memcached') {
             require_once($this->CONFIG['ROOT_PATH'] . 'classes' . DS . 'MemCacheDriver.class.php');
-            $this->CACHE->addDriver(NULL, new MemCacheDriver($this->CONFIG['cache_dir']));
+            $this->CACHE->addDriver(NULL, new MemCacheDriver());
         }
 
         require_once($this->CONFIG['ROOT_PATH'] . 'classes' . DS . 'lang.class.php');
