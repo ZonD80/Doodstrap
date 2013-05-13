@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   UNIQUE KEY `email_UNIQUE` (`email`),
   KEY `reset_hash` (`reset_hash`),
   KEY `verified` (`verified`),
-  KEY `id` (`id`,`verified`),
+  KEY `id` (`id`,`verified`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
