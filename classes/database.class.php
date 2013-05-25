@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Database operation class
+ * @license GNU GPLv3 http://opensource.org/licenses/gpl-3.0.html
+ * @package Doodstrap
+ */
 class DB {
 
     public $query, $connection;
@@ -8,14 +13,15 @@ class DB {
         //var_dump($this);
         return mysql_insert_id($this->connection);
     }
-    
+
     function mysql_affected_rows() {
         return mysql_affected_rows($this->connection);
     }
-    
+
     function mysql_errno() {
         return mysql_errno($this->connection);
     }
+
     /**
      * Sets mode to non-gui debug. Query times and errors will be printed directly to page.
      */
@@ -37,6 +43,11 @@ class DB {
         return $a[0] ? $a[0] : 0;
     }
 
+    /**
+     * Builds safe update subquery
+     * @param array $ar Associative array of column names and values
+     * @return string UPDATE subquery
+     */
     function build_update_query($ar) {
         foreach ($ar as $k => $v) {
             if (strlen($v))
@@ -47,6 +58,11 @@ class DB {
         return implode(', ', $to_update);
     }
 
+    /**
+     * Builds safe instert subquery
+     * @param array $ar Associative array of column names and values
+     * @return string INSERT subquery
+     */
     function build_insert_query($ar) {
         foreach ($ar as $k => $v) {
             $keys[] = $k;
@@ -70,21 +86,27 @@ class DB {
         return str_replace(array("%", "_"), array("\\%", "\\_"), mysql_real_escape_string($x));
     }
 
+    /**
+     * Class constructor
+     * @param array $db Associative array of database configuration
+     */
     function __construct($db) {
         $this->ttime = 0;
         $this->connection = @mysql_connect($db['host'], $db['user'], $db['pass']);
         if (!$this->connection)
             die("Error " . mysql_errno() . " aka " . mysql_error() . ". Failed to estabilish connection to SQL server");
-        mysql_select_db($db['db'])
-                or die("Cannot select database {$db['db']}: " + mysql_error());
+        mysql_select_db($db['db']) or die("Cannot select database {$db['db']}: " + mysql_error());
 
         $this->my_set_charset($db['charset']);
         $this->query = array();
         //$this->query[0] = array("seconds" => 0, "query" => 'TOTAL');
     }
-    
+
+    /**
+     * Class destructor
+     */
     function __destruct() {
-        mysql_close($this->connection);
+        @mysql_close($this->connection);
     }
 
     /**
@@ -106,7 +128,7 @@ class DB {
     function query($query) {
 
         $query_start_time = microtime(true); // Start time
-        $result = mysql_query($query,$this->connection);
+        $result = mysql_query($query, $this->connection);
         $query_end_time = microtime(true); // End time
         $query_time = ($query_end_time - $query_start_time);
         $this->ttime = $this->ttime + $query_time;
@@ -159,7 +181,8 @@ class DB {
                     $return[] = $row;
                 }
             return $return;
-        } else
+        }
+        else
             return false;
     }
 
@@ -177,3 +200,5 @@ class DB {
     }
 
 }
+
+?>

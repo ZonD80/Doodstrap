@@ -4,20 +4,20 @@
  * Main api class
  * @license GNU GPLv3 http://opensource.org/licenses/gpl-3.0.html
  * @package Doodstrap
- * @author ZonD80 <zond80@gmail.com>
- * @copyright (C) 2008-now, ZonD80
- * @link http://zond80.tel
  */
 class API {
-
+/**
+ * Processes form data using callback functions
+ * @param array $input Name of POST/GET variable with array of data
+ * @param array $callbacks Associative array of lamda-functions, keys are keys of POST/GET variable array
+ * @return array Processed array
+ */
     function process_form_data($input, $callbacks) {
         $input = $this->getval($input, 'array');
         foreach ($callbacks as $k => $c) {
-            //if (!function_exists($c)||!method_exists($input, $method_name)) die("Function does not exist on process_form_data ($c)");
-            $return[$k] = $c($input[$k]);
+           $return[$k] = $c($input[$k]);
         }
         return $return;
-        $this->write_log('form proxessed: ' . var_export($return, true));
     }
 
     /**
@@ -43,15 +43,21 @@ class API {
     function mysql_date($timestamp) {
         return date('Y-m-d', $timestamp);
     }
-
-    function validate_email($email) {
-        return filter_var((string) $email, FILTER_VALIDATE_EMAIL);
-    }
-
+/**
+ * Validates password length
+ * @param string $pass Plaintext password
+ * @return boolean True or false
+ */
     function validate_password($pass) {
         return (strlen((string) $pass) >= 5 ? true : false);
     }
-
+/**
+ * Generates pagination html code and SQL query LIMIT subquery
+ * @param int $count How many records in DB
+ * @param array $link Array to be used in pages link creation
+ * @param int $perpage Elements limit per page
+ * @return array Array of paginator, first is LIMIT subquery, second is html code of paginator
+ */
     function generate_pagination($count, $link = array(), $perpage = 24) {
 
         $return = '<div class="boot" style="display: block;">
@@ -140,7 +146,7 @@ class API {
 
         require_once $this->CONFIG['ROOT_PATH'] . "classes/class.phpmailer.php";
         $m = new PHPMailer();
-        $m->SetFrom($fromemail, $this->CONFIG['sitename']);
+        $m->SetFrom($fromemail, $fromname);
         $m->AddCustomHeader("Reply-to:" . $fromemail);
         $m->AddCustomHeader('Precedence: bulk');
 
@@ -167,14 +173,11 @@ class API {
      * Outputs $this->error with dieing
      */
     function error($text = 'Error') {
+        if (AJAX)
+            die($text);
         $this->TPL->assign('error', $text);
         $this->TPL->display('error.tpl');
         die();
-    }
-
-    function stdhead() {
-
-        return true;
     }
 
     /**
@@ -244,7 +247,10 @@ class API {
         }
         return $str;
     }
-
+/**
+ * Generate random password
+ * @return string Paintext Password
+ */
     function mkpassword() {
         // generate new password;
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -255,7 +261,12 @@ class API {
 
         return $newpassword;
     }
-
+/**
+ * Make password hash
+ * @param string $pass Plaintext password
+ * @param string $secret Password salt
+ * @return string MD5 hash
+ */
     function mkpasshash($pass, $secret) {
         return md5($secret . $pass . $secret);
     }
@@ -302,7 +313,12 @@ class API {
         }
         return;
     }
-
+/**
+ * Gets value from GET or POST converting in to required type
+ * @param string $name Key of GET or POST array
+ * @param string $type Type of variable to be returned
+ * @return mixed Variable from request
+ */
     function getval($name, $type = 'string') {
         if ($_GET[$name]) {
             $t = $_GET[$name];
@@ -312,7 +328,12 @@ class API {
         eval('$t = (' . $type . ')$t;');
         return $t;
     }
-
+/**
+ * Creates associative array of categories
+ * @param string $table Table to use
+ * @param string $where WHERE subquery
+ * @return array Associative array of categories
+ */
     function assoc_cats($table, $where = '') {
         $retdata = $this->API->DB->query_return("SELECT * FROM $table $where");
         if ($retdata) {
@@ -450,14 +471,21 @@ class API {
         return htmLawed($code, $config, $spec);
     }
 
+    /**
+     * API class counstructor
+     * @param array $CONFIG Configuration array
+     * @param array $db Database connection array
+     */
     function __construct($CONFIG, $db) {
         date_default_timezone_set('UTC');
         $this->CONFIG = &$CONFIG;
+
         /* @var database object */
         require_once($this->CONFIG['ROOT_PATH'] . 'classes' . DS . 'database.class.php');
 
         $this->DB = new DB($db);
         unset($db);
+
 
         /* @var object general cache object */
         require_once($this->CONFIG['ROOT_PATH'] . 'classes' . DS . 'cache.class.php');
@@ -504,7 +532,11 @@ class API {
 
         $this->TPL->assign('CONFIG', $this->CONFIG);
     }
-
+/**
+ * Loads module by specified mode and action
+ * @param string $mode Mode
+ * @param string $action Action
+ */
     function load_module($mode, $action = 'index') {
 
         if (!$action)
@@ -520,24 +552,41 @@ class API {
             $this->error('Unknown mode of operation');
         require_once($file);
     }
-
-    function write_log($string) {
-        if ($this->CONFIG['log']) {
-            $handle = @fopen($this->CONFIG['log'], 'a');
-            if (!$handle)
-                $this->error('Unable to open log file');
-            fwrite($handle, time() . " " . $this->getip() . " $string\n");
-        }
+/**
+ * Writes log to database
+ * @param string $action Text to be logged
+ * @param string $type Type of log
+ * @param string $object_id Related object id
+ * @param mixed $before Data before logging
+ * @param mixed $after Data after logging
+ * @return boolean
+ */
+    function write_log($action,$type,$object_id,$before=null,$after=null) {
+        $to_db['action'] = $action;
+        $to_db['type'] = $type;
+        $to_db['object_id'] = $object_id;
+        if ($before) $to_db['data_before'] = var_export ($before,true);
+        if ($after) $to_db['data_after'] = var_export ($after,true);
+        $to_db['added'] = $this->CONFIG['TIME'];
+        if ($this->account) $to_db['account_id'] = $this->account['id'];
+        $to_db['ip'] = $this->getip();
+        $to_db['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
+        $to_db['url'] = $_SERVER['REQUEST_URI'];
+        if ($_POST)
+        $to_db['post'] = var_export($_POST,true);
+        if ($_GET)
+        $to_db['get'] = var_export($_GET,true);
+        $this->DB->query("INSERT INTO logs {$this->DB->build_insert_query($to_db)}");
+        return true;
     }
-
-    /**
-     * Creates account
-     * @param string $email Email used to login
-     * @param string $password Password
-     * @param string $name Optional, account name
-     * @param array $data associative array of additional accounts table columns values
-     * @return boolean|int False or new account ID
-     */
+/**
+ * Creates new account
+ * @param string $email Email address of account
+ * @param string $password Plaintext password for account
+ * @param string $name Account username
+ * @param array $data Extended data array
+ * @return boolean|integer New user ID on success or false on fail
+ */
     function create_account($email, $password, $name = '', $data = null) {
         $to_db['name'] = $name;
         $to_db['pass_salt'] = $this->mksecret();
@@ -555,14 +604,13 @@ class API {
         else
             return $this->DB->mysql_insert_id();
     }
-
-    /**
-     * Logins account
-     * @param string $email
-     * @param string $password plaintext password
-     * @param boolean $nosession Do not start new session
-     * @return boolean|int account id on success, false on failure
-     */
+/**
+ * Logins/check login of account
+ * @param string $email Email
+ * @param string $password Password
+ * @param boolean $nosession Do not start session (e.g. check only)
+ * @return boolean True on success, false on fail
+ */
     function login_account($email, $password, $nosession = false) {
         $account = $this->DB->query_row("SELECT * FROM accounts WHERE email=" . $this->DB->sqlesc($email));
 
@@ -581,7 +629,12 @@ class API {
         else
             return false;
     }
-
+/**
+ * Session handler
+ * @global type $CONFIG
+ * @param type $option
+ * @return boolean
+ */
     function session($option = NULL) {
         global $CONFIG;
 
@@ -604,32 +657,32 @@ class API {
                 // is account with that data?
                 $check2 = $this->DB->get_row_count("accounts", " WHERE id={$id} AND pass_hash=" . $this->DB->sqlesc($pass_hash));
                 if ($check2) {
-                    $ar = array('phpsessid' => $sid, 'user_id' => $id, 'user_agent' => $_SERVER['HTTP_USER_AGENT'], 'ip' => $ip, 'started' => TIME);
+                    $ar = array('phpsessid' => $sid, 'user_id' => $id, 'user_agent' => $_SERVER['HTTP_USER_AGENT'], 'ip' => $ip, 'started' => $this->CONFIG['TIME']);
 //create new session
                     $this->DB->query("INSERT INTO sessions " . $this->DB->build_insert_query($ar) . " ON DUPLICATE KEY UPDATE " . $this->DB->build_update_query($ar));
                     $this->account = $this->get_account($id);
 // update cookie
-                    setcookie('id', $this->account['id'], $CONFIG['TIME'] + 86400 * 365 * 10);
-                    setcookie('hash', $this->account['pass_hash'], $CONFIG['TIME'] + 86400 * 365 * 10);
+                    setcookie('id', $this->account['id'], $this->CONFIG['TIME'] + 86400 * 365 * 10);
+                    setcookie('hash', $this->account['pass_hash'], $this->CONFIG['TIME'] + 86400 * 365 * 10);
 //ban here
-                    if ($this->account['expired'] && $this->account['expired'] < $CONFIG['TIME']) {
+                    if ($this->account['ban_reason']) {
                         $this->TPL->display('banned.tpl');
                         die();
                     }
                     return true;
                 }
             }
-            $ar = array('phpsessid' => $sid, 'user_agent' => $_SERVER['HTTP_USER_AGENT'], 'ip' => $ip, 'started' => TIME);
+            $ar = array('phpsessid' => $sid, 'user_agent' => $_SERVER['HTTP_USER_AGENT'], 'ip' => $ip, 'started' => $this->CONFIG['TIME']);
             $this->DB->query("INSERT INTO sessions " . $this->DB->build_insert_query($ar) . " ON DUPLICATE KEY UPDATE " . $this->DB->build_update_query($ar));
             return true;
         } else {
             //account exists
             $ar = array('phpsessid' => $sid, 'user_id' => $this->account['id'], 'user_agent' => $_SERVER['HTTP_USER_AGENT'], 'ip' => $ip, 'started' => TIME);
             $this->DB->query("INSERT INTO sessions " . $this->DB->build_insert_query($ar) . " ON DUPLICATE KEY UPDATE " . $this->DB->build_update_query($ar));
-            setcookie('id', $this->account['id'], $CONFIG['TIME'] + 86400 * 365 * 10);
-            setcookie('hash', $this->account['pass_hash'], $CONFIG['TIME'] + 86400 * 365 * 10);
+            setcookie('id', $this->account['id'], $this->CONFIG['TIME'] + 86400 * 365 * 10);
+            setcookie('hash', $this->account['pass_hash'], $this->CONFIG['TIME'] + 86400 * 365 * 10);
 //ban here
-            if ($this->account['expired'] && $this->account['expired'] < $CONFIG['TIME']) {
+            if ($this->account['expired'] && $this->account['expired'] < $this->CONFIG['TIME']) {
 
                 $this->TPL->display('banned.tpl');
                 die();
@@ -638,10 +691,16 @@ class API {
             return true;
         }
     }
-
+/**
+ * Gets account data
+ * @param int $id ID of account
+ * @param boolean $only_extra Return only extra account configuration
+ * @return boolean|array account data or false if no such account
+ */
     function get_account($id, $only_extra = false) {
         $configuration = $this->DB->query_return("SELECT name,value FROM accounts_configuration WHERE account_id={$id}");
         //if (!$configuration) $this->error('No configuration found for account');
+        if ($only_extra && !$configuration) return false;
         $extra = array();
         if ($configuration)
             foreach ($configuration as $c) {
@@ -651,33 +710,42 @@ class API {
         if ($only_extra)
             return $extra;
         $account = $this->DB->query_row("SELECT * FROM accounts WHERE id=$id");
-
+        if (!$account) return false;
 
 
         return array_merge($account, $extra);
     }
-
+/**
+ * Logs out user account
+ */
     function logout_account() {
         setcookie('id', NULL);
         setcookie('hash', NULL);
         $this->session('end');
     }
-
-    function auth($option = array()) {
+/**
+ * Checks that user logged in
+ * @param array $option Additional extended fields to check
+ * @param boolean $return Return false or redirect?
+ */
+    function auth($option = array(),$return=false) {
         //if (!isset($this->SESSION_STARTED))
         //$this->session();
         if (!$this->account) {
+            if ($return) return false;
             $this->safe_redirect($this->SEO->make_link('login', 'error', 'auth', 'returnto', urlencode($_SERVER['REQUEST_URI'])));
-
             die();
         }
 
         foreach ($option as $k => $v) {
             if ($this->account[$k] != $v) {
+                if ($return) return false;
                 $this->safe_redirect($this->SEO->make_link('login', 'error', 'access', 'returnto', urlencode($_SERVER['REQUEST_URI'])));
+                $this->write_log('Auth failed - no permissions', 'auth',  $this->account['id'],"$k != $v");
                 die();
             }
         }
+        return true;
     }
 
 }

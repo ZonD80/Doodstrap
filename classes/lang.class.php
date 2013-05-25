@@ -4,9 +4,6 @@
  * Language class
  * @license GNU GPLv3 http://opensource.org/licenses/gpl-3.0.html
  * @package Doodstrap
- * @author ZonD80 <zond80@gmail.com>
- * @copyright (C) 2008-now, ZonD80
- * @link http://zond80.tel
  */
 if (!defined("INIT"))
     die('Direct access to this file not allowed');
@@ -207,7 +204,13 @@ class LANG extends API {
         }
         $this->parsed_langs[$language][] = $file;
     }
-
+/**
+ * Imports language file to database
+ * @param string $file File location
+ * @param string $language Language to import to
+ * @param boolean $override Override current values
+ * @return boolean
+ */
     public function import_langfile($file, $language = 'en', $override = false) {
 
         $parse = @file($file, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
@@ -237,14 +240,17 @@ class LANG extends API {
         }
         return $return;
     }
-
+/**
+ * Exports language to file with downloading
+ * @param string $lang Language file
+ */
     public function export_langfile($lang) {
         header("Content-type: text/plain");
         header("Content-Disposition: attachment;filename=$lang.lang");
         header("Content-Transfer-Encoding: binary");
         header('Pragma: no-cache');
         header('Expires: 0');
-        print "// Script " . RELVERSION . " language tools\n";
+        print "// language tools\n";
         if (!$this->lang[$lang]) {
             $this->load($lang);
             if (!$this->lang[$lang])
@@ -302,7 +308,11 @@ class LANG extends API {
         }
         return $return;
     }
-
+/**
+ * Sets language to current user
+ * @param string $l Language code
+ * @return boolean True
+ */
     function setlang($l) {
         $l = substr(trim((string) $l), 0, 2);
         if (!in_array($l, explode(',', $this->API->CONFIG['languages'])))
