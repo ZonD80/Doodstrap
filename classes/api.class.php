@@ -719,8 +719,10 @@ class API {
  * Logs out user account
  */
     function logout_account() {
+        global $API;
         setcookie('id', NULL);
         setcookie('hash', NULL);
+        unset($API->account);
         $this->session('end');
     }
 /**
