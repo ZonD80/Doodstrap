@@ -142,7 +142,7 @@ class API {
      * @todo Normal SMTP functionality
      * @return boolean True or false while sending email
      */
-    function sent_mail($to, $fromname, $fromemail, $subject, $body, $multiplemail = '') {
+    function send_mail($to, $fromname, $fromemail, $subject, $body, $multiplemail = '') {
 
         require_once $this->CONFIG['ROOT_PATH'] . "classes/class.phpmailer.php";
         $m = new PHPMailer();
@@ -157,7 +157,7 @@ class API {
         $m->MsgHTML($body);
         if ($multiplemail) {
             //return true;
-            foreach (explode($multiplemail) as $addr) {
+            foreach (explode(',',$multiplemail) as $addr) {
                 $m2 = clone $m;
                 $m2->AddAddress($addr);
                 $return = $m2->Send();
@@ -240,7 +240,7 @@ class API {
      */
     function mksecret($length = 5) {
         $set = array("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F", "g", "G", "h", "H", "i", "I", "j", "J", "k", "K", "l", "L", "m", "M", "n", "N", "o", "O", "p", "P", "q", "Q", "r", "R", "s", "S", "t", "T", "u", "U", "v", "V", "w", "W", "x", "X", "y", "Y", "z", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-        $str;
+        $str='';
         for ($i = 1; $i <= $length; $i++) {
             $ch = rand(0, count($set) - 1);
             $str .= $set[$ch];
@@ -400,7 +400,7 @@ class API {
         if ($recursion)
             $return = false;
         else
-            $return = $this->API->CACHE->get('trees', "$table-way-$id");
+            $return = $this->API->CACHE->get('trees', "$table-way-$tid");
         if ($return === false) {
             $return = $this->API->DB->query_return("SELECT id,name,parent_id FROM $table WHERE id=$tid");
 

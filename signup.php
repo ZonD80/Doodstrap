@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         {$API->LANG->_('Please keep these credentials in a cool, dry place and away from children:)')}<br/><br/>
         --<br/>
         {$API->LANG->_('Best regards, team of')} {$CONFIG['sitename']}.";
-    $API->sent_mail($email, $CONFIG['sitename'], $CONFIG['siteemail'], "{$API->LANG->_('Registration on')} {$CONFIG['sitename']}", $body);
+    $API->send_mail($email, $CONFIG['sitename'], $CONFIG['siteemail'], "{$API->LANG->_('Registration on')} {$CONFIG['sitename']}", $body);
 
     $API->TPL->assign('message', $API->LANG->_('Your account has been created. Please check your email for login credentials'));
     $API->TPL->assign('warning', $API->LANG->_('EMAIL_ADD_TO_CONTACTS',$CONFIG['siteemail']));

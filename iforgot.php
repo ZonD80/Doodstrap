@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         --<br/>
         {$API->LANG->_('Best regards, team of')} {$CONFIG['sitename']}.";
     //print $body;
-    $API->sent_mail($email, $CONFIG['sitename'], $CONFIG['siteemail'], "{$API->LANG->_('Password reset on')} {$CONFIG['sitename']}", $body);
+    $API->send_mail($email, $CONFIG['sitename'], $CONFIG['siteemail'], "{$API->LANG->_('Password reset on')} {$CONFIG['sitename']}", $body);
 
     $API->TPL->assign('message', $API->LANG->_('Further instructions were sent to your email'));
     $API->TPL->assign('warning', $API->LANG->_('EMAIL_ADD_TO_CONTACTS',$CONFIG['siteemail']));
