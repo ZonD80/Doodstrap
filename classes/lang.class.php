@@ -223,6 +223,8 @@ class LANG extends API
     public function import_langfile($file, $language = 'en', $override = false)
     {
 
+        $to_database = array();
+
         $parse = @file($file, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
         if (!$parse)
             return false;
@@ -244,8 +246,9 @@ class LANG extends API
         //if ($return['errors']) return $return;
 
         foreach ($to_database as $key => $value) {
-            $q = $this->API->DB->query("INSERT INTO languages (lkey,ltranslate,lvalue) VALUES (" . $this->API->DB->sqlesc(($key)) . ",'$language'," . $this->API->DB->sqlesc(($value)) . ")" . ($override ? " ON DUPLICATE KEY UPDATE lvalue=" . $this->API->DB->sqlesc(($value)) : ''));
-            if ($q->errorCode() != 1062)
+            $query_result = $this->API->DB->query("INSERT INTO languages (lkey,ltranslate,lvalue) VALUES (" . $this->API->DB->sqlesc(($key)) . ",'$language'," . $this->API->DB->sqlesc(($value)) . ")" . ($override ? " ON DUPLICATE KEY UPDATE lvalue=" . $this->API->DB->sqlesc(($value)) : ''));
+            $error_info = $query_result->errorInfo();
+            if ($error_info[1] == 1062)
                 $return['words'][] = "$key : $value";
         }
         return $return;
