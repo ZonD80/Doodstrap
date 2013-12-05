@@ -8,7 +8,8 @@
 if (!defined("INIT"))
     die('Direct access to this file not allowed');
 
-class LANG extends API {
+class LANG extends API
+{
 
     private $API = NULL;
 
@@ -43,7 +44,8 @@ class LANG extends API {
      * @param string $CONFIG Configuration to use
      * @return boolean True
      */
-    function __construct($API) {
+    function __construct($API)
+    {
         $this->API = $API;
         if ($this->API->CONFIG['debug_language'])
             $this->DEBUG = true;
@@ -69,7 +71,8 @@ class LANG extends API {
      * @param string $option What file to load
      * @param string $file Load language from this file, if empty, loads from database
      */
-    public function load($language = 'en', $file = '') {
+    public function load($language = 'en', $file = '')
+    {
         if (!$file)
             $this->parse_db($language);
         else
@@ -82,13 +85,14 @@ class LANG extends API {
      * @params MORE works like sprintf
      * @return string String of a language file
      */
-    public function _() {
+    public function _()
+    {
         $args = func_get_args();
         array_unshift($args, $this->getlang());
 
         return call_user_func_array(array(&$this, "_translate"), $args);
     }
-    
+
     /**
      * Translate string to user by id and by given key to default language
      * @param int $id user id
@@ -96,7 +100,8 @@ class LANG extends API {
      * @params MORE works like sprintf
      * @return string String of a language file
      */
-    public function _to() {
+    public function _to()
+    {
         $args = func_get_args();
         $id = $args[0];
         unset($args[0]);
@@ -112,7 +117,8 @@ class LANG extends API {
      * @params MORE works like sprintf
      * @return string String of a language file
      */
-    public function _translate() {
+    public function _translate()
+    {
 
 
         $args = func_get_args();
@@ -148,7 +154,7 @@ class LANG extends API {
         //$return = ucfirst($return);
 
         if (count($args) > 1) {
-            $return = str_replace('% ','\% ',$return);
+            $return = str_replace('% ', '\% ', $return);
             $args[0] = $return;
             return call_user_func_array("sprintf", $args);
         } else {
@@ -160,14 +166,15 @@ class LANG extends API {
      * Parse language from database (cache) into associative array
      * @param string $language Language to parse
      */
-    private function parse_db($language = 'en') {
+    private function parse_db($language = 'en')
+    {
         if ($this->lang[$language])
             return;
         //var_dump($this->API->CACHE);
         $this->lang[$language] = $this->API->CACHE->get('languages', $language);
         if ($this->lang[$language] === false) {
-            $res = $this->API->DB->query("SELECT lkey,lvalue FROM languages WHERE ltranslate='$language' ORDER BY lkey ASC");
-            while ($row = mysql_fetch_assoc($res))
+            $res = $this->API->DB->query_return("SELECT lkey,lvalue FROM languages WHERE ltranslate='$language' ORDER BY lkey ASC");
+            foreach ($res as $row)
                 $this->lang[$language][strtolower($row['lkey'])] = $row['lvalue'];
             if (!$this->lang[$language]) {
                 print ("ERROR: no language ($language)");
@@ -183,7 +190,8 @@ class LANG extends API {
      * @param string $language Language to be used
      * @return boolean False on error & prints error message
      */
-    private function parse_langfile($file, $language = 'en') {
+    private function parse_langfile($file, $language = 'en')
+    {
         if (@in_array($file, $this->parsed_langs[$language]))
             return;
         $parse = @file($file, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
@@ -204,20 +212,22 @@ class LANG extends API {
         }
         $this->parsed_langs[$language][] = $file;
     }
-/**
- * Imports language file to database
- * @param string $file File location
- * @param string $language Language to import to
- * @param boolean $override Override current values
- * @return boolean
- */
-    public function import_langfile($file, $language = 'en', $override = false) {
+
+    /**
+     * Imports language file to database
+     * @param string $file File location
+     * @param string $language Language to import to
+     * @param boolean $override Override current values
+     * @return boolean
+     */
+    public function import_langfile($file, $language = 'en', $override = false)
+    {
 
         $parse = @file($file, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
         if (!$parse)
             return false;
-        $res = $this->API->DB->query("SELECT lkey,lvalue FROM languages WHERE ltranslate='$language'");
-        while ($row = mysql_fetch_assoc($res))
+        $res = $this->API->DB->query_return("SELECT lkey,lvalue FROM languages WHERE ltranslate='$language'");
+        foreach ($res as $row)
             $check[$row['lkey']] = $row['lvalue'];
         foreach ($parse as $string) {
             //$string = iconv('cp1251','utf-8',$string);
@@ -234,17 +244,19 @@ class LANG extends API {
         //if ($return['errors']) return $return;
 
         foreach ($to_database as $key => $value) {
-            $this->API->DB->query("INSERT INTO languages (lkey,ltranslate,lvalue) VALUES (" . $this->API->DB->sqlesc(($key)) . ",'$language'," . $this->API->DB->sqlesc(($value)) . ")" . ($override ? " ON DUPLICATE KEY UPDATE lvalue=" . $this->API->DB->sqlesc(($value)) : ''));
-            if (!mysql_errno())
+            $q = $this->API->DB->query("INSERT INTO languages (lkey,ltranslate,lvalue) VALUES (" . $this->API->DB->sqlesc(($key)) . ",'$language'," . $this->API->DB->sqlesc(($value)) . ")" . ($override ? " ON DUPLICATE KEY UPDATE lvalue=" . $this->API->DB->sqlesc(($value)) : ''));
+            if ($q->errorCode() != 1062)
                 $return['words'][] = "$key : $value";
         }
         return $return;
     }
-/**
- * Exports language to file with downloading
- * @param string $lang Language file
- */
-    public function export_langfile($lang) {
+
+    /**
+     * Exports language to file with downloading
+     * @param string $lang Language file
+     */
+    public function export_langfile($lang)
+    {
         header("Content-type: text/plain");
         header("Content-Disposition: attachment;filename=$lang.lang");
         header("Content-Transfer-Encoding: binary");
@@ -257,7 +269,7 @@ class LANG extends API {
                 die("ERROR: No lang to export ($lang)");
         }
         foreach ($this->lang[$lang] as $key => $value) {
-            print "$key=".str_replace(array("\n","\r","\r\n"),'',$value)."\n";
+            print "$key=" . str_replace(array("\n", "\r", "\r\n"), '', $value) . "\n";
         }
         die("// langfile ($lang) from " . $this->API->CONFIG['defaultbaseurl'] . " created at " . date('d/m/Y H:i:s'));
     }
@@ -266,7 +278,8 @@ class LANG extends API {
      * Gets current language setting
      * @return string 2-char language code
      */
-    function getlang($id = 0) {
+    function getlang($id = 0)
+    {
         if ($id) {
             if ($this->runtime_user_langs[$id]) return $this->runtime_user_langs[$id];
             $lang = $this->API->DB->query_row("SELECT lang FROM accounts WHERE id=$id");
@@ -277,7 +290,7 @@ class LANG extends API {
                 else
                     $return = $lang;
             } else $return = 'en';
-            
+
             $this->runtime_user_langs[$id] = $return;
             return $return;
         }
@@ -291,7 +304,7 @@ class LANG extends API {
                 $setlang = true;
         }
         if (!$return)
-            $return = substr(trim((string) $_COOKIE['lang']), 0, 2);
+            $return = substr(trim((string)$_COOKIE['lang']), 0, 2);
         if (!$return) {
             $return = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
             $setlang = true;
@@ -308,13 +321,15 @@ class LANG extends API {
         }
         return $return;
     }
-/**
- * Sets language to current user
- * @param string $l Language code
- * @return boolean True
- */
-    function setlang($l) {
-        $l = substr(trim((string) $l), 0, 2);
+
+    /**
+     * Sets language to current user
+     * @param string $l Language code
+     * @return boolean True
+     */
+    function setlang($l)
+    {
+        $l = substr(trim((string)$l), 0, 2);
         if (!in_array($l, explode(',', $this->API->CONFIG['languages'])))
             $l = 'en';
         $this->language = $l;
