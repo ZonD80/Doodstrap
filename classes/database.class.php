@@ -10,7 +10,7 @@ class DB
 
     public $connection;
 
-    private $active_query;
+    private $active_query,$error_info;
 
     function mysql_insert_id()
     {
@@ -25,7 +25,8 @@ class DB
 
     function mysql_errno()
     {
-        return $this->connection->errorCode();
+        $this->error_info = $this->connection->errorInfo();
+        return (int)$this->error_info[0];
     }
 
     /**
@@ -125,9 +126,10 @@ class DB
         if ($this->debug) {
             print "$query<br/>took $query_time, total {$this->ttime}<hr/>";
         }
-        if (!$result && $this->active_query->errorCode() != 1062) {
 
-            $to_log = "ERROR: " . $this->active_query->errorCode() . " - " . var_export($this->active_query->errorInfo(), true) . "<br/>$query<br/>took $query_time, total {$this->ttime}";
+        if (!$result && $this->mysql_errno() != 1062) {
+
+            $to_log = "ERROR:  - " . var_export($this->error_info, true) . "<br/>$query<br/>took $query_time, total {$this->ttime}";
 
             print $to_log;
             if (!$this->debug())
@@ -150,6 +152,19 @@ class DB
             $value = $this->connection->quote((string)$value);
         }
         return $value;
+    }
+
+    /**
+     * Escapes value making search query.
+     * <code>
+     * sqlwildcardesc ('The 120% alcohol');
+     * </code>
+     * @param string $x Value to be escaped
+     * @return string Escaped value
+     */
+    function sqlwildcardesc($x)
+    {
+        return $this->connection->quote('%' . str_replace(array("%", "_"), array("\\%", "\\_"), $x) . '%');
     }
 
     /**
