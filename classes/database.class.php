@@ -85,19 +85,6 @@ class DB
     }
 
     /**
-     * Escapes value making search query.
-     * <code>
-     * sqlwildcardesc ('The 120% alcohol');
-     * </code>
-     * @param string $x Value to be escaped
-     * @return string Escaped value
-     */
-    function sqlwildcardesc($x)
-    {
-        return str_replace(array("%", "_"), array("\\%", "\\_"), $this->connection->quote($x));
-    }
-
-    /**
      * Class constructor
      * @param array $db Associative array of database configuration
      */
