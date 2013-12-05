@@ -119,7 +119,7 @@ class DB
 
         $query_start_time = microtime(true); // Start time
         $this->active_query = $this->connection->prepare($query);
-        $result = $this->active_query->execute();
+        $this->active_query->execute();
         $query_end_time = microtime(true); // End time
         $query_time = ($query_end_time - $query_start_time);
         $this->ttime = $this->ttime + $query_time;
@@ -127,7 +127,7 @@ class DB
             print "$query<br/>took $query_time, total {$this->ttime}<hr/>";
         }
 
-        if (!$result && $this->mysql_errno() != 1062) {
+        if ($this->mysql_errno() && $this->mysql_errno() != 1062) {
 
             $to_log = "ERROR:  - " . var_export($this->error_info, true) . "<br/>$query<br/>took $query_time, total {$this->ttime}";
 
