@@ -114,8 +114,11 @@
       <p class="title">{$API->LANG->_('Set new password')}</p>
       <p class="subtitle">{$API->LANG->_('Please provide this information')} ({$API->LANG->_('all fields are required')}):</p>
 
-        <center>{$API->LANG->_('Desired password')}:<input type="password" name="password" required="required"/><br/>
-        {$API->LANG->_('Password activation email will be sent to you')}.</center>
+       <center>
+           {$API->LANG->_('Current password')}:<br/><input type="password" name="old_password" required="required"/><br/>
+           {$API->LANG->_('Desired password')}:<br/><input type="password" name="password" required="required"/><br/>
+           {$API->LANG->_('Desired password')} ({$API->LANG->_('confirmation')}):<br/><input type="password" name="password2" required="required"/><br/>
+           {$API->LANG->_('Password activation email will be sent to you')}.</center>
 
        <div class="clear"></div>
 
