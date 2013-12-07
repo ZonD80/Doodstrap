@@ -175,6 +175,7 @@ class DB
      */
     function query_return($query, $type = 'assoc')
     {
+        $return = array();
         $res = $this->query($query);
         if ($type == 'assoc')
             while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
