@@ -25,13 +25,13 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `expired` int(10) DEFAULT NULL COMMENT 'Время отключения аккаунта',
   `name` varchar(255) DEFAULT NULL,
   `lang` varchar(2) DEFAULT NULL COMMENT 'Language code to use',
-  `verified` tinyint(1) DEFAULT NULL COMMENT 'is person verified',
+  `unsubsctibed` tinyint(1) DEFAULT NULL COMMENT 'unsubscribed from all emails',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   KEY `reset_hash` (`reset_hash`),
-  KEY `verified` (`verified`),
+  KEY `unsubscribed` (`email`,`unsubsribed`),
   KEY `id` (`id`,`verified`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `accounts_configuration` (
   `value` text COMMENT 'Значение параметра',
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_id` (`account_id`,`name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `languages` (
   `ltranslate` varchar(2) NOT NULL,
   `lvalue` text NOT NULL,
   UNIQUE KEY `key` (`lkey`,`ltranslate`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `languages`
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `seorules` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `script` (`script`,`parameter`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
 
 --
 -- Dumping data for table `seorules`
@@ -107,4 +107,4 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   `started` int(10) unsigned NOT NULL COMMENT 'UNIX_TIMESTAMP старта сессии',
   PRIMARY KEY (`phpsessid`),
   KEY `started` (`started`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

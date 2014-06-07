@@ -138,11 +138,19 @@ class API {
      * @param string $fromemail sender email
      * @param string $subject subject of $this->message
      * @param string $body body of $this->message, excluding <html> and <body> tags
-     * @param string $multiplemail Multiple receivers mail adresses separated by comma
+     * @param boolean $force_send Force send of a message
      * @todo Normal SMTP functionality
      * @return boolean True or false while sending email
      */
-    function send_mail($to, $fromname, $fromemail, $subject, $body, $multiplemail = '') {
+    function send_mail($to, $fromname, $fromemail, $subject, $body, $force_send = false) {
+
+        if (!$force_send) {
+            $do_not_send_mail = $this->DB->query_row("SELECT 1 FROM accounts WHERE email={$this->DB->sqlesc($to)} AND unsubscribed=0");
+            if ($do_not_send_mail) {
+                return true;
+            }
+        }
+
 
         require_once $this->CONFIG['ROOT_PATH'] . "classes/class.phpmailer.php";
         $m = new PHPMailer();
@@ -153,19 +161,10 @@ class API {
         $m->CharSet = 'utf-8';
         $m->Subject = $subject;
         $this->TPL->assign('body', $body);
+        $this->TPL->assign('email', $email);
         $body = $this->TPL->fetch($this->CONFIG['TEMPLATE_PATH'] . DS . 'email.tpl');
         $m->MsgHTML($body);
-        if ($multiplemail) {
-            //return true;
-            foreach (explode(',',$multiplemail) as $addr) {
-                $m2 = clone $m;
-                $m2->AddAddress($addr);
-                $return = $m2->Send();
-            }
-            return $return;
-        }
-        else
-            $m->AddAddress($to);
+        $m->AddAddress($to);
         return $m->Send();
     }
 
