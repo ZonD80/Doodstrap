@@ -25,12 +25,11 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `expired` int(10) DEFAULT NULL COMMENT 'Время отключения аккаунта',
   `name` varchar(255) DEFAULT NULL,
   `lang` varchar(2) DEFAULT NULL COMMENT 'Language code to use',
-  `unsubsctibed` tinyint(1) DEFAULT NULL COMMENT 'unsubscribed from all emails',
+  `unsubscribed` tinyint(1) DEFAULT NULL COMMENT 'unsubscribed from all emails',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   KEY `reset_hash` (`reset_hash`),
-  KEY `unsubscribed` (`email`,`unsubsribed`),
-  KEY `id` (`id`,`verified`)
+  KEY `unsubscribed` (`email`,`unsubscribed`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

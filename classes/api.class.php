@@ -6,16 +6,17 @@
  * @package Doodstrap
  */
 class API {
-/**
- * Processes form data using callback functions
- * @param array $input Name of POST/GET variable with array of data
- * @param array $callbacks Associative array of lamda-functions, keys are keys of POST/GET variable array
- * @return array Processed array
- */
+
+    /**
+     * Processes form data using callback functions
+     * @param array $input Name of POST/GET variable with array of data
+     * @param array $callbacks Associative array of lamda-functions, keys are keys of POST/GET variable array
+     * @return array Processed array
+     */
     function process_form_data($input, $callbacks) {
         $input = $this->getval($input, 'array');
         foreach ($callbacks as $k => $c) {
-           $return[$k] = $c($input[$k]);
+            $return[$k] = $c($input[$k]);
         }
         return $return;
     }
@@ -43,22 +44,24 @@ class API {
     function mysql_date($timestamp) {
         return date('Y-m-d', $timestamp);
     }
-/**
- * Validates password length
- * @param string $pass Plaintext password
- * @return boolean True or false
- */
+
+    /**
+     * Validates password length
+     * @param string $pass Plaintext password
+     * @return boolean True or false
+     */
     function validate_password($pass) {
         return (strlen((string) $pass) >= 5 ? true : false);
     }
-/**
- * Generates pagination html code and SQL query LIMIT subquery
- * @param int $count How many records in DB
- * @param array $link Array to be used in pages link creation
- * @param int $perpage Elements limit per page
- * @return array Array of paginator, first is LIMIT subquery, second is html code of paginator
- */
-    function generate_pagination($count, $link = array(), $perpage = 24) {
+
+    /**
+     * Generates pagination html code and SQL query LIMIT subquery
+     * @param int $count How many records in DB
+     * @param array $link Array to be used in pages link creation
+     * @param int $perpage Elements limit per page
+     * @return array Array of paginator, first is LIMIT subquery, second is html code of paginator
+     */
+    function generate_pagination($count, $link = array(), $perpage = 25) {
 
         $return = '<div class="boot" style="display: block;">
 					<div id="moresearchtools-www" class="paginator">';
@@ -72,61 +75,76 @@ class API {
         $pages = ceil($count / $perpage);
         $limit = "LIMIT " . ($page_computed * $perpage) . "," . ($perpage);
         //if ($_COOKIE['test']) var_dump($limit);
-        if ($page_computed >= $pages)
-            return array($limit, '');
-        //var_dump($pages);
-        if ($pages == 1) {
-            $curlink = $link;
-            $curlink[] = 'page';
-            $curlink[] = $page;
-            $return.= "<a class=\"previous inactive\" href=\"javascript://\">{$this->LANG->_('Prev')}</a><ul class=\"paginator\"><li class=\"inactive\"><a href=\"{$this->SEO->make_link($curlink)}\">1</a></li></ul><a class=\"next inactive\" href=\"javascript://\">{$this->LANG->_('Next')}</a>";
+        /* if ($page_computed >= $pages)
+          return array($limit, '');
+          //var_dump($pages);
+          if ($pages == 1) {
+          $curlink = $link;
+          $curlink[] = 'page';
+          $curlink[] = $page;
+          $return.= "<a class=\"previous inactive\" href=\"javascript://\">{$this->LANG->_('Prev')}</a><ul class=\"paginator\"><li class=\"inactive\"><a href=\"{$this->SEO->make_link($curlink)}\">1</a></li></ul><a class=\"next inactive\" href=\"javascript://\">{$this->LANG->_('Next')}</a>";
+          } else {
+
+          if ($page_computed != 0) {
+          $prevlink = $link;
+          $prevlink[] = 'page';
+          $prevlink[] = $page - 1;
+          $return.= "<a class=\"previous\" href=\"{$this->SEO->make_link($prevlink)}\">{$this->LANG->_('Prev')}</a><ul class=\"paginator\">";
+          } else {
+          $return.="<a class=\"previous inactive\" href=\"javascript://\">{$this->LANG->_('Prev')}</a><ul class=\"paginator\">";
+          }
+
+          $nextpages = $pages - $page_computed;
+          if ($nextpages > 6)
+          $nextpages = 6;
+          $prevpages = ($page - 1);
+          if ($prevpages > 5)
+          $prevpages = 5;
+
+          //die (var_dump($prevpages));
+          for ($i = $prevpages; $i >= 1; $i-=1) {
+          $curlink = $link;
+          $curlink[] = 'page';
+          $curlink[] = $page - $i;
+          $return.="<li class=\"active\"><a href=\"{$this->SEO->make_link($curlink)}\">" . ($page - $i) . "</a></li>";
+          }
+          $curlink = $link;
+          $curlink[] = 'page';
+          $curlink[] = $page;
+          $return.="<li class=\"inactive\"><a href=\"{$this->SEO->make_link($curlink)}\">{$page}</a></li>";
+
+          for ($i = 1; $i < $nextpages; $i++) {
+          $curlink = $link;
+          $curlink[] = 'page';
+          $curlink[] = $page + $i;
+          $return.="<li class=\"active\"><a href=\"{$this->SEO->make_link($curlink)}\">" . ($page + $i) . "</a></li>";
+          }
+
+          if ($page + 1 < $pages) {
+          $nextlink = $link;
+          $nextlink[] = 'page';
+          $nextlink[] = $page + 1;
+          $return.= "</ul><a class=\"next\" href=\"{$this->SEO->make_link($nextlink)}\">{$this->LANG->_('Next')}</a>";
+          } else
+          $return.= "</ul><a class=\"next inactive\" href=\"javascript://\">{$this->LANG->_('Next')}</a>";
+          }
+         */
+
+
+        $curlink = $link;
+        $curlink[] = 'page';
+        $curlink[] = $page;
+        $nextlink = $link;
+        $nextlink[] = 'page';
+        $nextlink[] = $page + 1;
+        $prevlink = $link;
+        $prevlink[] = 'page';
+        $prevlink[] = $page - 1;
+        if ($page == 1) {
+            $return.= "<a class=\"previous inactive\" href=\"javascript://\">{$this->LANG->_('Prev')}</a><ul class=\"paginator\"><li class=\"inactive\"><a href=\"{$this->SEO->make_link($curlink)}\">1</a></li></ul><a class=\"next\" href=\"{$this->SEO->make_link($nextlink)}\">{$this->LANG->_('Next')}</a>";
         } else {
-
-            if ($page_computed != 0) {
-                $prevlink = $link;
-                $prevlink[] = 'page';
-                $prevlink[] = $page - 1;
-                $return.= "<a class=\"previous\" href=\"{$this->SEO->make_link($prevlink)}\">{$this->LANG->_('Prev')}</a><ul class=\"paginator\">";
-            } else {
-                $return.="<a class=\"previous inactive\" href=\"javascript://\">{$this->LANG->_('Prev')}</a><ul class=\"paginator\">";
-            }
-
-            $nextpages = $pages - $page_computed;
-            if ($nextpages > 6)
-                $nextpages = 6;
-            $prevpages = ($page - 1);
-            if ($prevpages > 5)
-                $prevpages = 5;
-
-            //die (var_dump($prevpages));
-            for ($i = $prevpages; $i >= 1; $i-=1) {
-                $curlink = $link;
-                $curlink[] = 'page';
-                $curlink[] = $page - $i;
-                $return.="<li class=\"active\"><a href=\"{$this->SEO->make_link($curlink)}\">" . ($page - $i) . "</a></li>";
-            }
-            $curlink = $link;
-            $curlink[] = 'page';
-            $curlink[] = $page;
-            $return.="<li class=\"inactive\"><a href=\"{$this->SEO->make_link($curlink)}\">{$page}</a></li>";
-
-            for ($i = 1; $i < $nextpages; $i++) {
-                $curlink = $link;
-                $curlink[] = 'page';
-                $curlink[] = $page + $i;
-                $return.="<li class=\"active\"><a href=\"{$this->SEO->make_link($curlink)}\">" . ($page + $i) . "</a></li>";
-            }
-
-            if ($page + 1 < $pages) {
-                $nextlink = $link;
-                $nextlink[] = 'page';
-                $nextlink[] = $page + 1;
-                $return.= "</ul><a class=\"next\" href=\"{$this->SEO->make_link($nextlink)}\">{$this->LANG->_('Next')}</a>";
-            }
-            else
-                $return.= "</ul><a class=\"next inactive\" href=\"javascript://\">{$this->LANG->_('Next')}</a>";
+            $return.= "<a class=\"previous\" href=\"{$this->SEO->make_link($prevlink)}\">{$this->LANG->_('Prev')}</a><ul class=\"paginator\"><li class=\"inactive\"><a href=\"{$this->SEO->make_link($curlink)}\">{$page}</a></li></ul><a class=\"next\" href=\"{$this->SEO->make_link($nextlink)}\">{$this->LANG->_('Next')}</a>";
         }
-
         $return .='</div></div>';
         return array($limit, $return);
     }
@@ -161,7 +179,7 @@ class API {
         $m->CharSet = 'utf-8';
         $m->Subject = $subject;
         $this->TPL->assign('body', $body);
-        $this->TPL->assign('email', $email);
+        $this->TPL->assign('email', $to);
         $body = $this->TPL->fetch($this->CONFIG['TEMPLATE_PATH'] . DS . 'email.tpl');
         $m->MsgHTML($body);
         $m->AddAddress($to);
@@ -182,10 +200,14 @@ class API {
     /**
      * Outputs $this->message with dieing
      */
-    function message($text = 'Message') {
+    function message($text = 'Message', $warning = '') {
 
-        $this->TPL->assign('MESSAGE', $text);
-        $this->TPL->output('system', 'message');
+        if (AJAX)
+            die($text);
+
+        $this->TPL->assign('message', $text);
+        $this->TPL->assign('warning', $warning);
+        $this->TPL->display('message.tpl');
         die();
     }
 
@@ -239,17 +261,18 @@ class API {
      */
     function mksecret($length = 5) {
         $set = array("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F", "g", "G", "h", "H", "i", "I", "j", "J", "k", "K", "l", "L", "m", "M", "n", "N", "o", "O", "p", "P", "q", "Q", "r", "R", "s", "S", "t", "T", "u", "U", "v", "V", "w", "W", "x", "X", "y", "Y", "z", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-        $str='';
+        $str = '';
         for ($i = 1; $i <= $length; $i++) {
             $ch = rand(0, count($set) - 1);
             $str .= $set[$ch];
         }
         return $str;
     }
-/**
- * Generate random password
- * @return string Paintext Password
- */
+
+    /**
+     * Generate random password
+     * @return string Paintext Password
+     */
     function mkpassword() {
         // generate new password;
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -260,12 +283,13 @@ class API {
 
         return $newpassword;
     }
-/**
- * Make password hash
- * @param string $pass Plaintext password
- * @param string $secret Password salt
- * @return string MD5 hash
- */
+
+    /**
+     * Make password hash
+     * @param string $pass Plaintext password
+     * @param string $secret Password salt
+     * @return string MD5 hash
+     */
     function mkpasshash($pass, $secret) {
         return md5($secret . $pass . $secret);
     }
@@ -281,6 +305,8 @@ class API {
      */
     function safe_redirect($url, $timeout = 0) {
         $url = trim($url);
+        if (AJAX)
+            return;
         /* if (REL_AJAX || ob_get_length()) */ print('
 			<script type="text/javascript" language="javascript">
 			function Redirect() {
@@ -312,27 +338,28 @@ class API {
         }
         return;
     }
-/**
- * Gets value from GET or POST converting in to required type
- * @param string $name Key of GET or POST array
- * @param string $type Type of variable to be returned
- * @return mixed Variable from request
- */
+
+    /**
+     * Gets value from GET or POST converting in to required type
+     * @param string $name Key of GET or POST array
+     * @param string $type Type of variable to be returned
+     * @return mixed Variable from request
+     */
     function getval($name, $type = 'string') {
         if ($_GET[$name]) {
             $t = $_GET[$name];
-        }
-        else
+        } else
             $t = $_POST[$name];
         eval('$t = (' . $type . ')$t;');
         return $t;
     }
-/**
- * Creates associative array of categories
- * @param string $table Table to use
- * @param string $where WHERE subquery
- * @return array Associative array of categories
- */
+
+    /**
+     * Creates associative array of categories
+     * @param string $table Table to use
+     * @param string $where WHERE subquery
+     * @return array Associative array of categories
+     */
     function assoc_cats($table, $where = '') {
         $retdata = $this->API->DB->query_return("SELECT * FROM $table $where");
         if ($retdata) {
@@ -340,8 +367,7 @@ class API {
                 $return[$r['id']] = $r;
             }
             return $return;
-        }
-        else
+        } else
             return array();
     }
 
@@ -382,8 +408,7 @@ class API {
             }
             $this->API->CACHE->set('trees', "$table-childs-$id", $return);
             return $return;
-        }
-        else
+        } else
             return $return;
     }
 
@@ -413,8 +438,7 @@ class API {
 
             $this->API->CACHE->set('trees', "$table-way-$tid", $return);
             return $return;
-        }
-        else
+        } else
             return $return;
     }
 
@@ -476,8 +500,11 @@ class API {
      * @param array $db Database connection array
      */
     function __construct($CONFIG, $db) {
-        date_default_timezone_set('UTC');
+        date_default_timezone_set('GMT');
         $this->CONFIG = &$CONFIG;
+
+        if ($this->CONFIG['use_compression'])
+            ob_start('ob_gzhandler');
 
         /* @var database object */
         require_once($this->CONFIG['ROOT_PATH'] . 'classes' . DS . 'database.class.php');
@@ -531,11 +558,12 @@ class API {
 
         $this->TPL->assign('CONFIG', $this->CONFIG);
     }
-/**
- * Loads module by specified mode and action
- * @param string $mode Mode
- * @param string $action Action
- */
+
+    /**
+     * Loads module by specified mode and action
+     * @param string $mode Mode
+     * @param string $action Action
+     */
     function load_module($mode, $action = 'index') {
 
         if (!$action)
@@ -551,41 +579,46 @@ class API {
             $this->error('Unknown mode of operation');
         require_once($file);
     }
-/**
- * Writes log to database
- * @param string $action Text to be logged
- * @param string $type Type of log
- * @param string $object_id Related object id
- * @param mixed $before Data before logging
- * @param mixed $after Data after logging
- * @return boolean
- */
-    function write_log($action,$type,$object_id,$before=null,$after=null) {
+
+    /**
+     * Writes log to database
+     * @param string $action Text to be logged
+     * @param string $type Type of log
+     * @param string $object_id Related object id
+     * @param mixed $before Data before logging
+     * @param mixed $after Data after logging
+     * @return boolean
+     */
+    function write_log($action, $type, $object_id, $before = null, $after = null) {
         $to_db['action'] = $action;
         $to_db['type'] = $type;
         $to_db['object_id'] = $object_id;
-        if ($before) $to_db['data_before'] = var_export ($before,true);
-        if ($after) $to_db['data_after'] = var_export ($after,true);
+        if ($before)
+            $to_db['data_before'] = var_export($before, true);
+        if ($after)
+            $to_db['data_after'] = var_export($after, true);
         $to_db['added'] = $this->CONFIG['TIME'];
-        if ($this->account) $to_db['account_id'] = $this->account['id'];
+        if ($this->account)
+            $to_db['account_id'] = $this->account['id'];
         $to_db['ip'] = $this->getip();
         $to_db['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
         $to_db['url'] = $_SERVER['REQUEST_URI'];
         if ($_POST)
-        $to_db['post'] = var_export($_POST,true);
+            $to_db['post'] = var_export($_POST, true);
         if ($_GET)
-        $to_db['get'] = var_export($_GET,true);
+            $to_db['get'] = var_export($_GET, true);
         $this->DB->query("INSERT INTO logs {$this->DB->build_insert_query($to_db)}");
         return true;
     }
-/**
- * Creates new account
- * @param string $email Email address of account
- * @param string $password Plaintext password for account
- * @param string $name Account username
- * @param array $data Extended data array
- * @return boolean|integer New user ID on success or false on fail
- */
+
+    /**
+     * Creates new account
+     * @param string $email Email address of account
+     * @param string $password Plaintext password for account
+     * @param string $name Account username
+     * @param array $data Extended data array
+     * @return boolean|integer New user ID on success or false on fail
+     */
     function create_account($email, $password, $name = '', $data = null) {
         $to_db['name'] = $name;
         $to_db['pass_salt'] = $this->mksecret();
@@ -603,13 +636,14 @@ class API {
         else
             return $this->DB->mysql_insert_id();
     }
-/**
- * Logins/check login of account
- * @param string $email Email
- * @param string $password Password
- * @param boolean $nosession Do not start session (e.g. check only)
- * @return boolean True on success, false on fail
- */
+
+    /**
+     * Logins/check login of account
+     * @param string $email Email
+     * @param string $password Password
+     * @param boolean $nosession Do not start session (e.g. check only)
+     * @return boolean True on success, false on fail
+     */
     function login_account($email, $password, $nosession = false) {
         $account = $this->DB->query_row("SELECT * FROM accounts WHERE email=" . $this->DB->sqlesc($email));
 
@@ -624,20 +658,21 @@ class API {
             if (!$nosession)
                 $this->session();
             return $this->account['id'];
-        }
-        else
+        } else
             return false;
     }
-/**
- * Session handler
- * @global type $CONFIG
- * @param type $option
- * @return boolean
- */
+
+    /**
+     * Session handler
+     * @global type $CONFIG
+     * @param type $option
+     * @return boolean
+     */
     function session($option = NULL) {
         global $CONFIG;
-
-        $this->DB->query("DELETE FROM sessions WHERE started<" . ($this->CONFIG['TIME'] - (15 * 60)));
+        if (PHP_SAPI == 'cli') {
+            return;
+        }
         session_start();
 
         $sid = session_id();
@@ -654,12 +689,18 @@ class API {
 
             if ($id && $pass_hash) {
                 // is account with that data?
-                $check2 = $this->DB->get_row_count("accounts", " WHERE id={$id} AND pass_hash=" . $this->DB->sqlesc($pass_hash));
+                $check2 = $this->DB->query_row("SELECT * FROM accounts WHERE id={$id} AND pass_hash=" . $this->DB->sqlesc($pass_hash));
                 if ($check2) {
                     $ar = array('phpsessid' => $sid, 'user_id' => $id, 'user_agent' => $_SERVER['HTTP_USER_AGENT'], 'ip' => $ip, 'started' => $this->CONFIG['TIME']);
 //create new session
                     $this->DB->query("INSERT INTO sessions " . $this->DB->build_insert_query($ar) . " ON DUPLICATE KEY UPDATE " . $this->DB->build_update_query($ar));
-                    $this->account = $this->get_account($id);
+                    $this->account = $check2;
+                    $extra = $this->get_account($id, true);
+                    if ($extra) {
+                        foreach ($extra as $k => $v) {
+                            $this->account[$k] = $v;
+                        }
+                    }
 // update cookie
                     setcookie('id', $this->account['id'], $this->CONFIG['TIME'] + 86400 * 365 * 10);
                     setcookie('hash', $this->account['pass_hash'], $this->CONFIG['TIME'] + 86400 * 365 * 10);
@@ -681,8 +722,7 @@ class API {
             setcookie('id', $this->account['id'], $this->CONFIG['TIME'] + 86400 * 365 * 10);
             setcookie('hash', $this->account['pass_hash'], $this->CONFIG['TIME'] + 86400 * 365 * 10);
 //ban here
-            if ($this->account['expired'] && $this->account['expired'] < $this->CONFIG['TIME']) {
-
+            if ($this->account['ban_reason']) {
                 $this->TPL->display('banned.tpl');
                 die();
             }
@@ -690,16 +730,18 @@ class API {
             return true;
         }
     }
-/**
- * Gets account data
- * @param int $id ID of account
- * @param boolean $only_extra Return only extra account configuration
- * @return boolean|array account data or false if no such account
- */
+
+    /**
+     * Gets account data
+     * @param int $id ID of account
+     * @param boolean $only_extra Return only extra account configuration
+     * @return boolean|array account data or false if no such account
+     */
     function get_account($id, $only_extra = false) {
         $configuration = $this->DB->query_return("SELECT name,value FROM accounts_configuration WHERE account_id={$id}");
         //if (!$configuration) $this->error('No configuration found for account');
-        if ($only_extra && !$configuration) return false;
+        if ($only_extra && !$configuration)
+            return false;
         $extra = array();
         if ($configuration)
             foreach ($configuration as $c) {
@@ -709,14 +751,16 @@ class API {
         if ($only_extra)
             return $extra;
         $account = $this->DB->query_row("SELECT * FROM accounts WHERE id=$id");
-        if (!$account) return false;
+        if (!$account)
+            return false;
 
 
         return array_merge($account, $extra);
     }
-/**
- * Logs out user account
- */
+
+    /**
+     * Logs out user account
+     */
     function logout_account() {
         global $API;
         setcookie('id', NULL);
@@ -724,25 +768,28 @@ class API {
         unset($API->account);
         $this->session('end');
     }
-/**
- * Checks that user logged in
- * @param array $option Additional extended fields to check
- * @param boolean $return Return false or redirect?
- */
-    function auth($option = array(),$return=false) {
+
+    /**
+     * Checks that user logged in
+     * @param array $option Additional extended fields to check
+     * @param boolean $return Return false or redirect?
+     */
+    function auth($option = array(), $return = false) {
         //if (!isset($this->SESSION_STARTED))
         //$this->session();
         if (!$this->account) {
-            if ($return) return false;
+            if ($return)
+                return false;
             $this->safe_redirect($this->SEO->make_link('login', 'error', 'auth', 'returnto', urlencode($_SERVER['REQUEST_URI'])));
             die();
         }
 
         foreach ($option as $k => $v) {
             if ($this->account[$k] != $v) {
-                if ($return) return false;
+                if ($return)
+                    return false;
                 $this->safe_redirect($this->SEO->make_link('login', 'error', 'access', 'returnto', urlencode($_SERVER['REQUEST_URI'])));
-                $this->write_log('Auth failed - no permissions', 'auth',  $this->account['id'],"$k != $v");
+                $this->write_log('Auth failed - no permissions', 'auth', $this->account['id'], "$k != $v");
                 die();
             }
         }
