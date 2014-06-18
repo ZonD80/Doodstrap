@@ -93,6 +93,7 @@ class DB {
             die("Error " . $e->getMessage() . ". Failed to establish connection to SQL server");
         }
         $this->query = array();
+        $this->query("SET NAMES {$db['charset']}");
         //$this->query[0] = array("seconds" => 0, "query" => 'TOTAL');
     }
 

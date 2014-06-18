@@ -36,10 +36,9 @@ if ($activate) {
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-    $account_used=true;
+    $account_used = true;
     if (!$API->account) {
-        $account_used=false;
+        $account_used = false;
         $resp = recaptcha_check_answer($privatekey, $_SERVER["REMOTE_ADDR"], $_POST["recaptcha_challenge_field"], $_POST["recaptcha_response_field"]);
 
         if ($resp->is_valid) {
@@ -73,13 +72,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $password = $API->mkpassword();
     } else {
         $account = $API->account;
-        $old_password=$API->getval('old_password');
-        $check = $API->login_account($account['email'],$old_password,true);
+        $old_password = $API->getval('old_password');
+        $check = $API->login_account($account['email'], $old_password, true);
         if (!$check) {
             $API->error($API->LANG->_('Invalid current password'));
         }
         $password2 = $API->getval('password2');
-        if ($password!=$password2) {
+        if ($password != $password2) {
             $API->error($API->LANG->_('New password and confirmation does not match'));
         }
         $email = $account['email'];
@@ -87,8 +86,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $to_db['pass_salt'] = $API->mksecret();
     $to_db['reset_hash'] = $API->mkpasshash($password, $to_db['pass_salt']);
-    if ($old_password)
-        $to_db['pass_hash'] = $API->mkpasshash($old_password,$to_db['pass_salt']);
+    if ($old_password) {
+        $to_db['pass_hash'] = $API->mkpasshash($old_password, $to_db['pass_salt']);
+    }
 
     $API->DB->query("UPDATE accounts SET " . $API->DB->build_update_query($to_db) . " WHERE id={$account['id']}");
 
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         {$API->LANG->_('You have just requested a password reset on')} {$CONFIG['sitename']}.<br/>
         {$API->LANG->_('Here are your new login details')} ({$API->LANG->_('valid for site forum too')}):<br/>
         {$API->LANG->_('E-mail')}: <b>$email</b><br/>
-        {$API->LANG->_('Password')}: <b>$password</b><br/>
+        {$API->LANG->_('Password')}: <b>" . ($account_used ? '*******' : $password) . "</b><br/>
         <b>{$API->LANG->_('To activate your new login credentials please visit this link')}: <a href=\"{$API->SEO->make_link('iforgot', 'activate', $to_db['reset_hash'])}\">{$API->SEO->make_link('iforgot', 'activate', $to_db['reset_hash'])}</a></b>
         <br/>
         {$API->LANG->_('You can change password later by clicking link in the bottom of a main page under My account section of menu.')}
@@ -107,10 +107,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         --<br/>
         {$API->LANG->_('Best regards, team of')} {$CONFIG['sitename']}.";
     //print $body;
-    $API->send_mail($email, $CONFIG['sitename'], $CONFIG['siteemail'], "{$API->LANG->_('Password reset on')} {$CONFIG['sitename']}", $body);
+    $API->send_mail($email, $CONFIG['sitename'], $CONFIG['siteemail'], "{$API->LANG->_('Password reset on')} {$CONFIG['sitename']}", $body, true);
 
     $API->TPL->assign('message', $API->LANG->_('Further instructions were sent to your email'));
-    $API->TPL->assign('warning', $API->LANG->_('EMAIL_ADD_TO_CONTACTS',$CONFIG['siteemail']));
+    $API->TPL->assign('warning', $API->LANG->_('EMAIL_ADD_TO_CONTACTS', $CONFIG['siteemail']));
     $API->TPL->display('message.tpl');
     die();
 }

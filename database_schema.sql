@@ -15,6 +15,24 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 -- Table structure for table `accounts`
 --
+CREATE TABLE IF NOT EXISTS `logs` (
+  `account_id` int(10) unsigned DEFAULT NULL,
+  `action` text NOT NULL COMMENT 'action description',
+  `data_before` text,
+  `data_after` text,
+  `added` int(10) unsigned NOT NULL COMMENT 'unix timestamp',
+  `type` varchar(255) NOT NULL COMMENT 'type of log',
+  `object_id` int(10) unsigned NOT NULL COMMENT 'id of object action applied to',
+  `ip` varchar(15) NOT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `url` varchar(255) DEFAULT NULL,
+  `post` text NOT NULL,
+  `get` text NOT NULL,
+  KEY `account_id` (`account_id`,`type`),
+  KEY `object_id` (`object_id`),
+  KEY `added` (`added`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='log admicp actions';
+
 
 CREATE TABLE IF NOT EXISTS `accounts` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID аккаунта',
