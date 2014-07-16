@@ -163,7 +163,7 @@ class API {
     function send_mail($to, $fromname, $fromemail, $subject, $body, $force_send = false) {
 
         if (!$force_send) {
-            $do_not_send_mail = $this->DB->query_row("SELECT 1 FROM accounts WHERE email={$this->DB->sqlesc($to)} AND unsubscribed=0");
+            $do_not_send_mail = $this->DB->query_row("SELECT 1 FROM accounts WHERE email={$this->DB->sqlesc($to)} AND email_notifications!='none'");
             if ($do_not_send_mail) {
                 return true;
             }
@@ -702,8 +702,8 @@ class API {
                         }
                     }
 // update cookie
-                    setcookie('id', $this->account['id'], $this->CONFIG['TIME'] + 86400 * 365 * 10);
-                    setcookie('hash', $this->account['pass_hash'], $this->CONFIG['TIME'] + 86400 * 365 * 10);
+                    setcookie('id', $this->account['id'], $this->CONFIG['TIME'] + 86400 * 365 * 10,'/');
+                    setcookie('hash', $this->account['pass_hash'], $this->CONFIG['TIME'] + 86400 * 365 * 10,'/');
 //ban here
                     if ($this->account['ban_reason']) {
                         $this->TPL->display('banned.tpl');
@@ -719,8 +719,8 @@ class API {
             //account exists
             $ar = array('phpsessid' => $sid, 'user_id' => $this->account['id'], 'user_agent' => $_SERVER['HTTP_USER_AGENT'], 'ip' => $ip, 'started' => TIME);
             $this->DB->query("INSERT INTO sessions " . $this->DB->build_insert_query($ar) . " ON DUPLICATE KEY UPDATE " . $this->DB->build_update_query($ar));
-            setcookie('id', $this->account['id'], $this->CONFIG['TIME'] + 86400 * 365 * 10);
-            setcookie('hash', $this->account['pass_hash'], $this->CONFIG['TIME'] + 86400 * 365 * 10);
+            setcookie('id', $this->account['id'], $this->CONFIG['TIME'] + 86400 * 365 * 10,'/');
+            setcookie('hash', $this->account['pass_hash'], $this->CONFIG['TIME'] + 86400 * 365 * 10,'/');
 //ban here
             if ($this->account['ban_reason']) {
                 $this->TPL->display('banned.tpl');
@@ -763,8 +763,8 @@ class API {
      */
     function logout_account() {
         global $API;
-        setcookie('id', NULL);
-        setcookie('hash', NULL);
+        setcookie('id', NULL,NULL,'/');
+        setcookie('hash', NULL,NULL,'/');
         unset($API->account);
         $this->session('end');
     }
